@@ -1,2 +1,5 @@
 processflow: src/processflow.c
-	gcc src/processflow.c -o processflow
+	gcc src/processflow.c src/interpretador.c src/task.c src/job.c -o processflow
+
+make run:
+	./processflow

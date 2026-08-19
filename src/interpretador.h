@@ -1,0 +1,1 @@
+void interpretar(char linha[], char *args[]);

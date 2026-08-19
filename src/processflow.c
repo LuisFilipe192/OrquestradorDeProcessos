@@ -2,9 +2,20 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "interpretador.h"
+#include "task.h"
+
 int main(int argc, char *argv[]){
 
+    job *cabeca = NULL;
+
+    task *head = NULL;
+
     char linha[1000];
+
+    char *args[100];
+
+    int i=0;
 
     if(argc == 1){
         printf("modo interativo\n");
@@ -21,22 +32,30 @@ int main(int argc, char *argv[]){
         printf("processflow> ");
 
         if(fgets(linha,1000,stdin)!=NULL){
-            for(int i = 0;linha[i] != '\0';i++){
+            for(i = 0;linha[i] != '\0';i++){
                 if(linha[i] == '\n'){
                     linha[i] = '\0';
+
                     break;
                 }
-                if(strcmp(linha,"exit")){
-                    return 0;
+            }
+            if(strcmp(linha,"exit") == 0){
+                return 0;
+            }
+
+            interpretar(linha,args);
+
+            if(strcmp(args[0],"task") == 0){
+                if(args[1] != NULL && args[2] != NULL){
+                    task_create(args, &head);
                 }
             }
-            
-            printf("linha: %s\n", linha);
         }
         else{
             return 0;
         }
     }
 
+  
     return 0;
 }
