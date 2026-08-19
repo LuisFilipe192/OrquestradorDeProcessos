@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 int main(int argc, char *argv[]){
 
@@ -20,12 +21,21 @@ int main(int argc, char *argv[]){
         printf("processflow> ");
 
         if(fgets(linha,1000,stdin)!=NULL){
-            printf("leitura completa\n");
+            for(int i = 0;linha[i] != '\0';i++){
+                if(linha[i] == '\n'){
+                    linha[i] = '\0';
+                    break;
+                }
+                if(strcmp(linha,"exit")){
+                    return 0;
+                }
+            }
+            
+            printf("linha: %s\n", linha);
         }
         else{
             return 0;
         }
-
     }
 
     return 0;
