@@ -54,25 +54,105 @@ int main(int argc, char *argv[]){
             }
 
             if(strcmp(args[0],"run") == 0){
-                if(args[1] != NULL){
-                    task *retorno = procurar_task(head,args[1]);
 
-                    if(retorno !=NULL){
-                        job *novo = job_create(&cabeca,retorno,jobID);
-                        
-                        job_execute(novo);
+                if(strcmp(args[1],"sequential")== 0){
+                    for(i=2;args[i] !=NULL;i++){
+                        task *retorno = procurar_task(head,args[i]);
 
-                        jobID++;
+                        if(retorno != NULL){
+                            job *novo = job_create(&cabeca,retorno,jobID);
+
+                            job_execute(novo);
+                            job_wait(novo);
+
+                            jobID++;
+                        }
                     }
                 }
 
+                else if(strcmp(args[1],"parallel")== 0){
+
+                    job *ultimo = cabeca;
+                    job *atual;
+
+                    while(cabeca != NULL && ultimo->proximo!=NULL){
+                        ultimo = ultimo->proximo;
+                    }
+                    for(i=2;args[i] != NULL;i++){
+                        task *retorno =procurar_task(head,args[i]);
+
+                        if(retorno != NULL){
+                            job *novo = job_create(&cabeca,retorno,jobID);
+
+                            job_execute(novo);
+
+                            jobID++;
+                        }
+                    }
+
+                    if(ultimo == NULL){
+                            atual = cabeca;
+                    }
+                    else{
+                        atual = ultimo->proximo;
+                    }
+
+                    while(atual !=NULL){
+                        job_wait(atual);
+                        atual = atual->proximo;
+                    }
+                }
+
+                else if(args[1] != NULL){
+                task *retorno = procurar_task(head,args[1]);
+
+                if(retorno !=NULL){
+                    job *novo = job_create(&cabeca,retorno,jobID);
+                    
+                    job_execute(novo);
+                    job_wait(novo);
+
+                    jobID++;
+                }
             }
+            }
+
+            else if(strcmp(args[0], "start") == 0){
+
+                task *retorno =procurar_task(head,args[1]);
+
+                if(retorno !=NULL){
+                    job* novo = job_create(&cabeca,retorno,jobID);
+
+                    job_execute(novo);
+                    jobID++;
+                    
+                    printf("[%d] %d\n",novo->jobID,novo->PID);
+                }
+            }
+            else if(strcmp(args[0], "jobs") == 0){
+                job *atual = cabeca;
+
+                while(atual != NULL){
+                    if(atual->estado == executando){
+                        printf("[%d] %d -> executando\n",atual->jobID,atual->PID);
+                    }
+                    else if(atual->estado == encerrado){
+                        printf("[%d] %d -> encerrado\n",atual->jobID,atual->PID);
+                    }
+                    else if(atual->estado == falhou){
+                        printf("[%d] %d -> falhou\\\\\\\n",atual->jobID,atual->PID);
+                    }
+                    
+                    atual = atual->proximo;
+                }
+
+            }
+            else if(strcmp(args[0], "wait") == 0){
         }
         else{
             return 0;
         }
     }
-
-  
-    return 0;
-}
+        return 0;
+    }

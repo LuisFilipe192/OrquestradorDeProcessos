@@ -36,21 +36,10 @@ job *job_create(job **cabeca,task *tarefa,int jobID){
 void job_execute(job *jobzao){
     int resultado = fork();
     int i;
-    int status;
 
     if(resultado>0){
         jobzao->PID = resultado;
         jobzao->estado = executando;
-        waitpid(jobzao->PID, &status, 0);
-
-        if(WIFEXITED(status)==0){
-            if(WEXITSTATUS(status) == 0){
-                jobzao->estado = encerrado;
-            }
-            else{
-                jobzao->estado = falhou;
-            }
-        }
     }
 
     else if(resultado == 0){
@@ -78,5 +67,26 @@ void job_execute(job *jobzao){
         jobzao->estado = falhou;
         perror("fork");
     }
-    
+}
+
+void job_wait(job *jobzao){
+    int status;
+
+    waitpid(jobzao->PID, &status, 0);
+
+        if(WIFEXITED(status)){
+            if(WEXITSTATUS(status) == 0){
+                jobzao->estado = encerrado;
+            }
+            else{
+                jobzao->estado = falhou;
+            }
+        }
+
+        if(jobzao->estado == falhou){
+            printf("job FALHADO!\n");
+        }
+        if(jobzao->estado == encerrado){
+            printf("job ENCERRADO!\n");
+        }
 }
