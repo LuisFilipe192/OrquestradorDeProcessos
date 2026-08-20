@@ -1,7 +1,7 @@
 #include <sys/types.h>
 #include "task.h"
 
-typedef enum {
+typedef enum{
     executando,
     encerrado,
     falhou,
@@ -14,7 +14,8 @@ typedef struct job{
     estadojob estado;
     task *tarefa;
     struct job *proximo;
-}
+}job;
 
-job *job_create(job **cabeca,task *tarefa, int jobID;);
+job *job_create(job **cabeca,task *tarefa, int jobID);
 
+void job_execute(job *jobzao);
