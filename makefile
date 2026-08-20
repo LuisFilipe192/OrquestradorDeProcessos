@@ -3,3 +3,6 @@ processflow: src/processflow.c
 
 make run:
 	./processflow
+
+clean:
+	rm -f processflow

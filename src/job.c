@@ -4,6 +4,8 @@
 #include <unistd.h>
 #include <string.h>
 
+#include <sys/wait.h>
+
 job *job_create(job **cabeca,task *tarefa,int jobID){
     job *novo = (job*)malloc(sizeof(job));
 
@@ -34,11 +36,23 @@ job *job_create(job **cabeca,task *tarefa,int jobID){
 void job_execute(job *jobzao){
     int resultado = fork();
     int i;
+    int status;
 
     if(resultado>0){
         jobzao->PID = resultado;
         jobzao->estado = executando;
+        waitpid(jobzao->PID, &status, 0);
+
+        if(WIFEXITED(status)==0){
+            if(WEXITSTATUS(status) == 0){
+                jobzao->estado = encerrado;
+            }
+            else{
+                jobzao->estado = falhou;
+            }
+        }
     }
+
     else if(resultado == 0){
         char *argv_exec[100];
         char *token;
@@ -59,6 +73,10 @@ void job_execute(job *jobzao){
         exit(1);
 
 
+    }
+    else{
+        jobzao->estado = falhou;
+        perror("fork");
     }
     
 }
