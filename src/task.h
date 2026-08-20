@@ -11,3 +11,5 @@ typedef struct task{
 void task_create(char *args[], task **head);
 
 void imprimir_task(task *head);
+
+task *procurar_task(task *head, char nome[]);

@@ -17,6 +17,8 @@ int main(int argc, char *argv[]){
 
     int i=0;
 
+    int jobID = 1;
+
     if(argc == 1){
         printf("modo interativo\n");
     }
@@ -49,6 +51,21 @@ int main(int argc, char *argv[]){
                 if(args[1] != NULL && args[2] != NULL){
                     task_create(args, &head);
                 }
+            }
+
+            if(strcmp(args[0],"run") == 0){
+                if(args[1] != NULL){
+                    task *retorno = procurar_task(head,args[1]);
+
+                    if(retorno !=NULL){
+                        job *novo = job_create(&cabeca,retorno,jobID);
+                        
+                        job_execute(novo);
+
+                        jobID++;
+                    }
+                }
+
             }
         }
         else{

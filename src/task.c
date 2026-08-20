@@ -46,3 +46,16 @@ void imprimir_task(task *head){
         atual = atual->proximo;
     }
 }
+
+task *procurar_task(task *head, char nome[]){
+    task *atual = head;
+
+    while(atual != NULL && strcmp(atual->nome,nome)!=0 ){
+        atual = atual->proximo;
+    }
+
+    if(atual ==NULL){
+        return NULL;
+    }
+    return atual;
+}
