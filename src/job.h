@@ -21,3 +21,5 @@ job *job_create(job **cabeca,task *tarefa, int jobID);
 void job_execute(job *jobzao);
 
 void job_wait(job *jobzao);
+
+void pipe_executar(task *head,char **args,job **cabeca, int *jobID);

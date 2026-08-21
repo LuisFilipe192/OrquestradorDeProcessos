@@ -19,6 +19,9 @@ int main(int argc, char *argv[]){
 
     int jobID = 1;
 
+    int erro_sequential = 0;
+    int erro_parallel = 0;
+
     if(argc == 1){
         printf("modo interativo\n");
     }
@@ -47,77 +50,149 @@ int main(int argc, char *argv[]){
 
             interpretar(linha,args);
 
+            if(args[0] == NULL){
+                continue;
+            }
+
             if(strcmp(args[0],"task") == 0){
-                if(args[1] != NULL && args[2] != NULL){
-                    task_create(args, &head);
+                task *retorno = procurar_task(head, args[1]);
+                if(retorno!=NULL){
+                    printf("erro: tarefa ja cadastrada\n");
+                    
+                }
+                
+                else{
+                    if(args[1] != NULL && args[2] != NULL){
+                        task_create(args, &head);
+                    }
                 }
             }
 
             if(strcmp(args[0],"run") == 0){
 
+                if(args[1] == NULL){
+                    printf("erro: tarefa não informada\n");
+                    continue;
+                }
+
                 if(strcmp(args[1],"sequential")== 0){
-                    for(i=2;args[i] !=NULL;i++){
-                        task *retorno = procurar_task(head,args[i]);
+                    erro_sequential=0;
+                    if(args[2] == NULL){
+                        printf("erro: tarefa não informada\n");
+                        continue;
+                    }
+                    else{
+                        for(i=2;args[i] !=NULL;i++){
+                            task *retorno = procurar_task(head,args[i]);
+                            if(retorno==NULL){
+                                printf("erro: tarefa não existe\n");
+                                erro_sequential = 1;
+                            }
+                            if(erro_sequential==1){
+                                continue;
+                            }
 
-                        if(retorno != NULL){
-                            job *novo = job_create(&cabeca,retorno,jobID);
+                            else{
+                                job *novo = job_create(&cabeca,retorno,jobID);
 
-                            job_execute(novo);
-                            job_wait(novo);
+                                job_execute(novo);
+                                job_wait(novo);
 
-                            jobID++;
+                                jobID++;
+                            }
                         }
                     }
                 }
 
                 else if(strcmp(args[1],"parallel")== 0){
+                    erro_parallel = 0;
 
-                    job *ultimo = cabeca;
-                    job *atual;
-
-                    while(cabeca != NULL && ultimo->proximo!=NULL){
-                        ultimo = ultimo->proximo;
+                    if(args[2] == NULL){
+                        printf("erro: tarefa nao informada\n");
+                        continue;
                     }
-                    for(i=2;args[i] != NULL;i++){
-                        task *retorno =procurar_task(head,args[i]);
 
-                        if(retorno != NULL){
-                            job *novo = job_create(&cabeca,retorno,jobID);
+                    else{
+                        for(i=2;args[i] != NULL;i++){
+                            task *retorno = procurar_task(head, args[i]);
 
-                            job_execute(novo);
+                            if(retorno ==NULL){
+                                printf("erro: tarefa não existe\n");
+                                erro_parallel = 1;
+                            }
+                        }
 
-                            jobID++;
+                        if(erro_parallel==1){
+                            continue;
+                        }
+
+                        job *ultimo = cabeca;
+                        job *atual;
+
+                        while(cabeca != NULL && ultimo->proximo!=NULL){
+                            ultimo = ultimo->proximo;
+                        }
+
+                        for(i=2;args[i] != NULL;i++){
+                            task *retorno =procurar_task(head,args[i]);
+                            if(retorno==NULL){
+                                printf("erro: tarefa não existe\n");
+                                continue;
+                            }
+
+                            else{
+                                job *novo = job_create(&cabeca,retorno,jobID);
+
+                                job_execute(novo);
+
+                                jobID++;
+                            }
+                        }
+
+                        if(ultimo == NULL){
+                            atual = cabeca;
+                        }
+
+                        else{
+                            atual = ultimo->proximo;
+                        }
+
+                        while(atual !=NULL){
+                            job_wait(atual);
+                            atual = atual->proximo;
                         }
                     }
-
-                    if(ultimo == NULL){
-                            atual = cabeca;
-                    }
-                    else{
-                        atual = ultimo->proximo;
-                    }
-
-                    while(atual !=NULL){
-                        job_wait(atual);
-                        atual = atual->proximo;
-                    }
                 }
 
-                else if(args[1] != NULL){
-                task *retorno = procurar_task(head,args[1]);
+                    else if(strcmp(args[1],"pipe") == 0){    
+                        if(args[2] == NULL && args[3] == NULL){
+                            printf("erro: tarefas não informadas\n");
+                            continue;
+                        }
+                        pipe_executar(head,args,&cabeca,&jobID);
 
-                if(retorno !=NULL){
-                    job *novo = job_create(&cabeca,retorno,jobID);
-                    
-                    job_execute(novo);
-                    job_wait(novo);
+                    }
 
-                    jobID++;
-                }
-            }
+                    else if(args[1] != NULL){
+                    task *retorno = procurar_task(head,args[1]);
+
+                    if(retorno !=NULL){
+                        job *novo = job_create(&cabeca,retorno,jobID);
+                        
+                        job_execute(novo);
+                        job_wait(novo);
+
+                        jobID++;
+                    }
+                
+                }   
             }
 
             else if(strcmp(args[0], "start") == 0){
+                if(args[1] == NULL){
+                    printf("erro: tarefa nao informada\n");
+                    continue;
+                }
 
                 task *retorno =procurar_task(head,args[1]);
 
@@ -180,6 +255,7 @@ int main(int argc, char *argv[]){
                     }
                 }
             }
+
             else if(strcmp(args[0],"append") == 0){
                 if(args[1] != NULL && args[2] != NULL ){
                     task *retorno = procurar_task(head, args[1]);
@@ -189,11 +265,12 @@ int main(int argc, char *argv[]){
                     }
                 }
             }
+            
 
         }
         else{
             return 0;
         }
     }
-        return 0;
-    }
+    return 0;
+}
