@@ -141,14 +141,55 @@ int main(int argc, char *argv[]){
                         printf("[%d] %d -> encerrado\n",atual->jobID,atual->PID);
                     }
                     else if(atual->estado == falhou){
-                        printf("[%d] %d -> falhou\\\\\\\n",atual->jobID,atual->PID);
+                        printf("[%d] %d -> falhoun",atual->jobID,atual->PID);
                     }
-                    
                     atual = atual->proximo;
                 }
-
             }
             else if(strcmp(args[0], "wait") == 0){
+                job *atual = cabeca;
+                while(atual != NULL){
+                    if(atual->jobID==atoi(args[1])){
+                        job_wait(atual);
+                        break;
+                    }
+                    else{
+                        atual=atual->proximo;
+                    }
+                }
+                if(atual == NULL){
+                    printf("erro: job nao encontrado\n");
+                }
+            }
+
+            else if(strcmp(args[0],"input") == 0){
+                if(args[1] != NULL && args[2] != NULL ){
+                    task *retorno = procurar_task(head, args[1]);
+
+                    if(retorno!=NULL){
+                    strcpy(retorno->input,args[2]);
+                    }
+                }
+            }
+            else if(strcmp(args[0],"output") == 0){
+                if(args[1] != NULL && args[2] != NULL ){
+                    task *retorno = procurar_task(head, args[1]);
+
+                    if(retorno!=NULL){
+                    strcpy(retorno->output,args[2]);
+                    }
+                }
+            }
+            else if(strcmp(args[0],"append") == 0){
+                if(args[1] != NULL && args[2] != NULL ){
+                    task *retorno = procurar_task(head, args[1]);
+
+                    if(retorno!=NULL){
+                    strcpy(retorno->append,args[2]);
+                    }
+                }
+            }
+
         }
         else{
             return 0;

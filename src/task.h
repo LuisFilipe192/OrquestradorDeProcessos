@@ -4,7 +4,7 @@ typedef struct task{
     char argumentos[100];
     struct task *proximo;
     char input[10000];
-    char ouput[10000];
+    char output[10000];
     char append[100000];
 }task;
 

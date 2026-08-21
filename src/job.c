@@ -1,10 +1,12 @@
 #include "job.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
 
 #include <sys/wait.h>
+#include <fcntl.h>
 
 job *job_create(job **cabeca,task *tarefa,int jobID){
     job *novo = (job*)malloc(sizeof(job));
@@ -37,6 +39,8 @@ void job_execute(job *jobzao){
     int resultado = fork();
     int i;
 
+    int arquivo;
+
     if(resultado>0){
         jobzao->PID = resultado;
         jobzao->estado = executando;
@@ -55,6 +59,51 @@ void job_execute(job *jobzao){
             token = strtok(NULL," ");
         }
         argv_exec[i] = NULL;
+
+        if(jobzao->tarefa->input[0] != '\0'){
+            arquivo = open(jobzao->tarefa->input, O_RDONLY);
+            
+            if(arquivo == -1){
+                perror("open");
+                exit(1);
+            }
+
+            if(dup2(arquivo,0) == -1){
+                perror("dup2");
+                exit(1);
+            }
+            close(arquivo);
+        }
+
+        if(jobzao->tarefa->output[0] != '\0'){
+            arquivo = open(jobzao->tarefa->output, O_WRONLY|O_CREAT|O_TRUNC, 0644);
+            
+            if(arquivo == -1){
+                perror("open");
+                exit(1);
+            }
+
+            if(dup2(arquivo,1) == -1){
+                perror("dup2");
+                exit(1);
+            }
+            close(arquivo);
+        }
+
+        if(jobzao->tarefa->append[0] != '\0'){
+            arquivo = open(jobzao->tarefa->append, O_WRONLY|O_CREAT|O_APPEND, 0644);
+            
+            if(arquivo == -1){
+                perror("open");
+                exit(1);
+            }
+
+            if(dup2(arquivo,1) == -1){
+                perror("dup2");
+                exit(1);
+            }
+            close(arquivo);
+        }
 
         execv(jobzao->tarefa->programa,argv_exec);
 
