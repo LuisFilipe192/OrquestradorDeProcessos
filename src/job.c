@@ -8,6 +8,7 @@
 #include <sys/wait.h>
 #include <fcntl.h>
 
+
 job *job_create(job **cabeca,task *tarefa,int jobID){
     job *novo = (job*)malloc(sizeof(job));
 
@@ -35,7 +36,8 @@ job *job_create(job **cabeca,task *tarefa,int jobID){
     return novo;
 }
 
-void job_execute(job *jobzao){
+void job_execute(job *jobzao,char workdir[]){
+
     int resultado = fork();
     int i;
 
@@ -47,6 +49,14 @@ void job_execute(job *jobzao){
     }
 
     else if(resultado == 0){
+    
+        if(workdir[0] != '\0'){
+            if(chdir(workdir) == -1){
+                perror("chdir");
+                exit(1);
+            }
+        }
+        
         char *argv_exec[100];
         char *token;
         argv_exec[0] = jobzao->tarefa->programa;
@@ -133,7 +143,7 @@ void job_wait(job *jobzao){
         }
 }
 
-void pipe_executar(task *head,char **args,job **cabeca, int *jobID){
+void pipe_executar(task *head,char **args,job **cabeca, int *jobID,char workdir[]){
 
     int i;
     int quantidade = 0;
@@ -211,6 +221,14 @@ void pipe_executar(task *head,char **args,job **cabeca, int *jobID){
         }
 
         else if(resultado == 0){
+                            
+            if(workdir[0] != '\0'){
+                if(chdir(workdir) == -1){
+                    perror("chdir");
+                    exit(1);
+                }
+            }
+            
 
             if(i == 2){
                 if(dup2(pipes[0][1], 1) == -1){

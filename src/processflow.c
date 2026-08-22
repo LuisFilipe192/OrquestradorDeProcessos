@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <sys/stat.h>
+
 #include "interpretador.h"
 #include "job.h"
 
@@ -14,6 +16,8 @@ int main(int argc, char *argv[]){
     char linha[1000];
 
     char *args[100];
+
+    char workdir[1000]= "";
 
     int i=0;
 
@@ -95,7 +99,7 @@ int main(int argc, char *argv[]){
                             else{
                                 job *novo = job_create(&cabeca,retorno,jobID);
 
-                                job_execute(novo);
+                                job_execute(novo,workdir);
                                 job_wait(novo);
 
                                 jobID++;
@@ -143,7 +147,7 @@ int main(int argc, char *argv[]){
                             else{
                                 job *novo = job_create(&cabeca,retorno,jobID);
 
-                                job_execute(novo);
+                                job_execute(novo,workdir);
 
                                 jobID++;
                             }
@@ -169,7 +173,7 @@ int main(int argc, char *argv[]){
                             printf("erro: tarefas não informadas\n");
                             continue;
                         }
-                        pipe_executar(head,args,&cabeca,&jobID);
+                        pipe_executar(head,args,&cabeca,&jobID,workdir);
 
                     }
 
@@ -179,7 +183,7 @@ int main(int argc, char *argv[]){
                     if(retorno !=NULL){
                         job *novo = job_create(&cabeca,retorno,jobID);
                         
-                        job_execute(novo);
+                        job_execute(novo,workdir);
                         job_wait(novo);
 
                         jobID++;
@@ -199,7 +203,7 @@ int main(int argc, char *argv[]){
                 if(retorno !=NULL){
                     job* novo = job_create(&cabeca,retorno,jobID);
 
-                    job_execute(novo);
+                    job_execute(novo,workdir);
                     jobID++;
                     
                     printf("[%d] %d\n",novo->jobID,novo->PID);
@@ -216,7 +220,7 @@ int main(int argc, char *argv[]){
                         printf("[%d] %d -> encerrado\n",atual->jobID,atual->PID);
                     }
                     else if(atual->estado == falhou){
-                        printf("[%d] %d -> falhoun",atual->jobID,atual->PID);
+                        printf("[%d] %d -> falhou\n",atual->jobID,atual->PID);
                     }
                     atual = atual->proximo;
                 }
@@ -263,6 +267,15 @@ int main(int argc, char *argv[]){
                     if(retorno!=NULL){
                     strcpy(retorno->append,args[2]);
                     }
+                }
+            }
+
+            else if(strcmp(args[0],"workdir")==0){
+                if(args[1]!= NULL && args[2] == NULL){
+                    strcpy(workdir, args[1]);
+                }
+                else{
+                    printf("erro: diretorio nao informado\n");
                 }
             }
             
