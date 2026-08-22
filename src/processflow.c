@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include <sys/stat.h>
+#include <sys/wait.h>
 
 #include "interpretador.h"
 #include "job.h"
@@ -210,11 +211,37 @@ int main(int argc, char *argv[]){
                 }
             }
             else if(strcmp(args[0], "jobs") == 0){
+
                 job *atual = cabeca;
+                int status;
+                int resultado;
+
 
                 while(atual != NULL){
                     if(atual->estado == executando){
-                        printf("[%d] %d -> executando\n",atual->jobID,atual->PID);
+
+                        resultado = waitpid(atual->PID, &status, WNOHANG);
+                        if(resultado == 0){
+                            printf("[%d] %d -> executando\n",atual->jobID,atual->PID);
+
+                        }
+                        else if(resultado == atual->PID){
+                            if(WIFEXITED(status)){
+                                if(WEXITSTATUS(status) == 0){
+                                    atual->estado = encerrado;
+                                }
+                                else{
+                                    atual->estado = falhou;
+                                }
+                            
+                                if(atual->estado == encerrado){
+                                    printf("[%d] %d -> encerrado\n",atual->jobID, atual->PID);
+                                }
+                                else if(atual->estado == falhou){
+                                    printf("[%d] %d -> falhou\n",atual->jobID, atual->PID);
+                                }
+                            }
+                        }
                     }
                     else if(atual->estado == encerrado){
                         printf("[%d] %d -> encerrado\n",atual->jobID,atual->PID);
